@@ -22,10 +22,11 @@ def remove_number_at_end(input_string):
     
     return result
 
-def read_data(data_path):
+
+def read_data(data_path:str, flatten_controller:bool = False, image_size:int = 128):
     num_data = len(os.listdir(data_path))
-    X = np.zeros((num_data, 128*128*3), dtype=int)
-    y = np.zeros(num_data, dtype=int)
+    X = [] #np.zeros((num_data, image_size*image_size*3), dtype=int)
+    y = [] #np.zeros(num_data, dtype=int)
     
     for i, filename in enumerate(os.listdir(data_path)):
         # Read the image
@@ -33,8 +34,8 @@ def read_data(data_path):
         image = Image.open(image_path)
 
         # Resize it to 128x128
-        if(image.size != (128,128)):
-            image = image.resize(size=(128,128))
+        if(image.size != (image_size, image_size)):
+            image = image.resize(size=(image_size, image_size))
 
         # Convert to RGB
         image = image.convert("RGB")
@@ -43,7 +44,8 @@ def read_data(data_path):
         image = np.array(image)
 
         # Flatten the image
-        image = image.flatten()
+        if flatten_controller:
+            image = image.flatten()
 
         # Get the label
         label = filename.split('_')[-1] # Remove aug_i_ part
@@ -51,7 +53,11 @@ def read_data(data_path):
         label = remove_number_at_end(label) # Remove number at the end
         label = LABELS[label]
 
-        X[i] = image
-        y[i] = label
+        X.append(image)
+        y.append(label)
 
-    return X, y
+    x_np = np.array(X)
+    y_np = np.array(y)
+
+
+    return x_np, y_np
